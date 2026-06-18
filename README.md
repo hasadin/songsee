@@ -109,12 +109,39 @@ npm run send
 { "latitude": 13.7563, "longitude": 100.5018, "title": "ตำแหน่งล่าสุด", "address": "13.7563, 100.5018", "updatedAt": "2026-06-18T01:30:00Z" }
 ```
 
+### Android — MacroDroid (วิธีที่ง่ายที่สุด ✅)
+
+ไม่ต้องยุ่งกับ base64/sha — ยิง **POST ครั้งเดียว** ไปที่ `repository_dispatch`
+แล้ว workflow `update-location.yml` จะอัปเดต `location.json` ให้เอง
+
+**เตรียม token:** สร้าง GitHub **Fine-grained PAT** (Settings → Developer settings →
+Personal access tokens) ให้สิทธิ์ repo นี้แบบ **Contents: Read and write**
+
+**สร้าง Macro ใน MacroDroid:**
+
+- **Trigger:** Day/Time → ทุกวัน เวลา **08:55**
+- **Action 1:** บังคับอัปเดตตำแหน่ง / Get current location (ให้ค่าพิกัดสด)
+- **Action 2:** **HTTP Request (POST)**
+  - URL: `https://api.github.com/repos/<USER>/<REPO>/dispatches`
+  - Headers:
+    - `Authorization: Bearer <PAT>`
+    - `Accept: application/vnd.github+json`
+  - Content type: `application/json`
+  - Body:
+    ```json
+    {
+      "event_type": "update-location",
+      "client_payload": { "lat": "{lat_magic}", "lng": "{lng_magic}" }
+    }
+    ```
+    > แทน `{lat_magic}` / `{lng_magic}` ด้วย Magic Text ของละติจูด/ลองจิจูดใน MacroDroid
+
+ลำดับการทำงานต่อวัน: **08:55** มือถือยิงพิกัด → `location.json` อัปเดต →
+**09:00** GitHub Actions ส่งเข้า LINE
+
 ### Android — Tasker / HTTP Shortcuts
 
-ใช้ Tasker (หรือแอป "HTTP Shortcuts") ดึง `%LOC` แล้วยิง `PUT` แบบเดียวกัน
-
-> 💡 อยากให้ง่ายกว่านี้ บอกได้ครับ — ผมทำ workflow `repository_dispatch`
-> หรือ endpoint รับพิกัดจากมือถือแบบ POST ครั้งเดียวจบให้ได้
+ใช้หลักการเดียวกับ MacroDroid ด้านบน: ดึงพิกัด แล้ว POST ไป `repository_dispatch`
 
 ---
 

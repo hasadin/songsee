@@ -1,0 +1,41 @@
+name: รับพิกัดล่าสุดจากมือถือ
+
+on:
+  repository_dispatch:
+    # มือถือ (MacroDroid) ยิง event ชนิดนี้พร้อมพิกัด
+    types: [update-location]
+
+# ต้องมีสิทธิ์เขียน เพื่อ commit location.json กลับเข้า repo
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: เขียนพิกัดลง location.json
+        env:
+          LAT: ${{ github.event.client_payload.lat }}
+          LNG: ${{ github.event.client_payload.lng }}
+          ADDRESS: ${{ github.event.client_payload.address }}
+        run: node src/applyDispatch.js
+
+      - name: Commit ตำแหน่งล่าสุด
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet location.json; then
+            echo "ตำแหน่งไม่เปลี่ยน ไม่ต้อง commit"
+          else
+            git add location.json
+            git commit -m "chore: update location from phone"
+            git push
+          fi
