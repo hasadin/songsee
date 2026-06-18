@@ -1,0 +1,15 @@
+{
+  "name": "songsee",
+  "version": "1.0.0",
+  "description": "ส่งโลเคชั่นเข้า LINE อัตโนมัติตอน 9 โมงเช้า ด้วย LINE Messaging API + GitHub Actions",
+  "type": "module",
+  "main": "src/sendLocation.js",
+  "scripts": {
+    "send": "node src/sendLocation.js",
+    "update": "node src/updateLocation.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}
